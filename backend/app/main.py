@@ -940,63 +940,56 @@ def serve_frontend():
 
 
     async function updateTaskStats() {
-      console.log("🔄 FORCE UPDATING STATS...");
+      console.log("🔄 STARTING REAL STATS UPDATE...");
       
-      // IMMEDIATE TEST - Set test values first
-      document.getElementById("total-count").textContent = "TEST";
-      document.getElementById("pending-count").textContent = "TEST";
-      document.getElementById("completed-count").textContent = "TEST";
-      
-      setTimeout(async () => {
-        try {
-          // Get all tasks with simple fetch
-          const response = await fetch("/tasks?page=1&page_size=1000", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + token
-            }
+      try {
+        // Use the same apiFetch function that works for loading tasks
+        const response = await apiFetch("/tasks?page=1&page_size=1000", "GET");
+        console.log("📊 Response received:", response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📋 Raw data:", data);
+          
+          const tasks = data.tasks || [];
+          console.log("📝 Tasks array:", tasks);
+          
+          // Count tasks
+          const totalCount = tasks.length;
+          const completedTasks = tasks.filter(task => {
+            console.log("Task:", task.title, "Completed:", task.completed);
+            return task.completed === true;
+          });
+          const completedCount = completedTasks.length;
+          const pendingCount = totalCount - completedCount;
+          
+          console.log("🧮 CALCULATED:", {
+            total: totalCount,
+            completed: completedCount,
+            pending: pendingCount,
+            completedTasks: completedTasks
           });
           
-          console.log("📊 Response status:", response.status);
+          // Update DOM
+          document.getElementById("total-count").textContent = totalCount.toString();
+          document.getElementById("pending-count").textContent = pendingCount.toString();
+          document.getElementById("completed-count").textContent = completedCount.toString();
           
-          if (response.ok) {
-            const data = await response.json();
-            console.log("📋 All tasks data:", data);
-            
-            const allTasks = data.tasks || [];
-            const totalCount = allTasks.length;
-            const completedCount = allTasks.filter(task => task.completed === true).length;
-            const pendingCount = totalCount - completedCount;
-            
-            console.log("🧮 FINAL COUNTS:", {
-              total: totalCount,
-              completed: completedCount, 
-              pending: pendingCount,
-              tasks: allTasks
-            });
-            
-            // FORCE UPDATE DOM
-            document.getElementById("total-count").innerHTML = totalCount;
-            document.getElementById("pending-count").innerHTML = pendingCount;
-            document.getElementById("completed-count").innerHTML = completedCount;
-            
-            console.log("✅ DOM FORCE UPDATED!");
-          } else {
-            console.error("❌ API call failed:", response.status);
-            // Show error in stats
-            document.getElementById("total-count").textContent = "ERR";
-            document.getElementById("pending-count").textContent = "ERR";
-            document.getElementById("completed-count").textContent = "ERR";
-          }
-        } catch (error) {
-          console.error("💥 CATCH ERROR:", error);
-          // Show error in stats
-          document.getElementById("total-count").textContent = "ERR";
+          console.log("✅ STATS UPDATED SUCCESSFULLY!");
+          
+        } else {
+          console.error("❌ API Response not OK:", response.status);
+          document.getElementById("total-count").textContent = "API";
           document.getElementById("pending-count").textContent = "ERR";
-          document.getElementById("completed-count").textContent = "ERR";
+          document.getElementById("completed-count").textContent = response.status;
         }
-      }, 100);
+        
+      } catch (error) {
+        console.error("💥 ERROR in updateTaskStats:", error);
+        document.getElementById("total-count").textContent = "JS";
+        document.getElementById("pending-count").textContent = "ERR";
+        document.getElementById("completed-count").textContent = "OR";
+      }
     }
 
 
