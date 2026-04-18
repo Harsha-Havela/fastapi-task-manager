@@ -16,7 +16,7 @@ A full-stack Task Manager application built with **FastAPI** (backend) and **Jin
 |-----------|-------------------------------------|
 | Backend   | FastAPI, SQLAlchemy, SQLite/PostgreSQL |
 | Authentication | JWT (python-jose), bcrypt (passlib) |
-| Frontend  | Jinja2 Templates + HTML/CSS/JavaScript |
+| Frontend  | Embedded HTML/CSS/JavaScript         |
 | Testing   | pytest + httpx TestClient            |
 | Deployment | Railway + Docker                     |
 
@@ -56,9 +56,7 @@ task-manager/
 │   │   ├── schemas/
 │   │   │   ├── user.py          # User Pydantic schemas
 │   │   │   └── task.py          # Task Pydantic schemas
-│   │   ├── templates/
-│   │   │   └── index.html       # Frontend Jinja2 template
-│   │   └── main.py              # FastAPI application entry point
+│   │   └── main.py              # FastAPI app with embedded frontend
 │   ├── tests/
 │   │   ├── conftest.py          # Test configuration
 │   │   ├── test_auth.py         # Authentication tests
@@ -240,7 +238,7 @@ ALGORITHM=HS256
 - **Pydantic** for data validation and serialization
 - **JWT** for stateless authentication
 - **bcrypt** for secure password hashing
-- **Jinja2** for server-side template rendering
+- **Embedded HTML** for reliable frontend delivery
 
 ### Frontend Features:
 - **Single Page Application** with dynamic content loading
