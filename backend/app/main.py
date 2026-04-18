@@ -460,6 +460,27 @@ def serve_frontend():
       backdrop-filter: blur(10px);
     }
 
+    .auth-switch {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      color: #718096;
+      font-size: 0.95rem;
+    }
+
+    .auth-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .auth-link:hover {
+      color: #5a67d8;
+      text-decoration: underline;
+    }
+
     @media (max-width: 480px) {
       .container {
         padding-top: 20px;
@@ -532,6 +553,10 @@ def serve_frontend():
         <button type="submit">Login</button>
       </form>
       <p id="login-error" class="error hidden"></p>
+      <div class="auth-switch">
+        <span>Don't have an account? </span>
+        <a href="#" onclick="showTab('register')" class="auth-link">Register</a>
+      </div>
     </div>
 
     <!-- Register -->
@@ -548,6 +573,10 @@ def serve_frontend():
       </form>
       <p id="register-error" class="error hidden"></p>
       <p id="register-success" class="success hidden"></p>
+      <div class="auth-switch">
+        <span>Already have an account? </span>
+        <a href="#" onclick="showTab('login')" class="auth-link">Login</a>
+      </div>
     </div>
   </div>
 
