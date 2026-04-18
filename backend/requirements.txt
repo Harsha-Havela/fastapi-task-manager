@@ -8,3 +8,4 @@ bcrypt
 python-multipart
 email-validator
 passlib[bcrypt]
+jinja2
