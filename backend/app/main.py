@@ -703,6 +703,7 @@ def serve_frontend():
         <span class="stat-number" id="completed-count">0</span>
         <span class="stat-label">Completed</span>
       </div>
+      <button onclick="updateTaskStats()" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem;">🔄 Refresh</button>
     </div>
 
     <!-- Create Task -->
@@ -937,49 +938,83 @@ def serve_frontend():
 
 
 
-  async function updateTaskStats(){
-
-  try{
-
-  let totalResp=
-  await apiFetch("/tasks?page=1&page_size=1000","GET");
-
-  let totalData=
-  await totalResp.json();
-
-
-  let completedResp=
-  await apiFetch("/tasks?page=1&page_size=1000&completed=true","GET");
-
-  let completedData=
-  await completedResp.json();
-
-
-  let totalCount=
-  totalData.tasks.length;
-
-  let completedCount=
-  completedData.tasks.length;
-
-  let pendingCount=
-  totalCount-completedCount;
-
-
-  document.getElementById("total-count").textContent=
-  totalCount;
-
-  document.getElementById("pending-count").textContent=
-  pendingCount;
-
-  document.getElementById("completed-count").textContent=
-  completedCount;
-
-  }
-  catch(err){
-  console.log(err);
-  }
-
-  }
+    async function updateTaskStats() {
+      try {
+        console.log("🔄 Starting stats update...");
+        
+        // Get all tasks
+        let totalResp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
+        console.log("📊 Total response status:", totalResp.status);
+        
+        if (!totalResp.ok) {
+          console.error("❌ Total tasks API failed");
+          return;
+        }
+        
+        let totalData = await totalResp.json();
+        console.log("📋 Total data:", totalData);
+        
+        // Get completed tasks
+        let completedResp = await apiFetch("/tasks?page=1&page_size=1000&completed=true", "GET");
+        console.log("✅ Completed response status:", completedResp.status);
+        
+        if (!completedResp.ok) {
+          console.error("❌ Completed tasks API failed");
+          return;
+        }
+        
+        let completedData = await completedResp.json();
+        console.log("✅ Completed data:", completedData);
+        
+        let totalCount = totalData.tasks ? totalData.tasks.length : 0;
+        let completedCount = completedData.tasks ? completedData.tasks.length : 0;
+        let pendingCount = totalCount - completedCount;
+        
+        console.log("🧮 Calculated counts:", {
+          total: totalCount,
+          completed: completedCount,
+          pending: pendingCount
+        });
+        
+        // Update DOM with error checking
+        const totalEl = document.getElementById("total-count");
+        const pendingEl = document.getElementById("pending-count");
+        const completedEl = document.getElementById("completed-count");
+        
+        console.log("🎯 DOM elements found:", {
+          totalEl: !!totalEl,
+          pendingEl: !!pendingEl,
+          completedEl: !!completedEl
+        });
+        
+        if (totalEl) {
+          totalEl.textContent = totalCount.toString();
+          console.log("✅ Updated total to:", totalCount);
+        }
+        if (pendingEl) {
+          pendingEl.textContent = pendingCount.toString();
+          console.log("✅ Updated pending to:", pendingCount);
+        }
+        if (completedEl) {
+          completedEl.textContent = completedCount.toString();
+          console.log("✅ Updated completed to:", completedCount);
+        }
+        
+        console.log("🎉 Stats update completed successfully!");
+        
+      } catch(err) {
+        console.error("💥 Error in updateTaskStats:", err);
+        
+        // Emergency fallback - set visible numbers
+        const totalEl = document.getElementById("total-count");
+        const pendingEl = document.getElementById("pending-count");
+        const completedEl = document.getElementById("completed-count");
+        
+        if (totalEl) totalEl.textContent = "?";
+        if (pendingEl) pendingEl.textContent = "?";
+        if (completedEl) completedEl.textContent = "?";
+      }
+    }
 
 
 
