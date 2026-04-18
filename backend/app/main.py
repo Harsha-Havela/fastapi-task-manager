@@ -703,6 +703,7 @@ def serve_frontend():
         <span class="stat-number" id="completed-count">0</span>
         <span class="stat-label">Completed</span>
       </div>
+      <button onclick="updateTaskStats()" style="background: #ff4444; border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem; font-weight: bold;">FIX NOW</button>
     </div>
 
     <!-- Create Task -->
@@ -939,17 +940,28 @@ def serve_frontend():
 
     async function updateTaskStats() {
       try {
-        const resp = await apiFetch("/tasks/stats", "GET");
+        // Use the SAME API call that loads tasks - we know this works
+        const resp = await apiFetch("/tasks?page=1&page_size=100", "GET");
         
-        if (!resp.ok) return;
-        
-        const data = await resp.json();
-        
-        document.getElementById("total-count").textContent = data.total;
-        document.getElementById("pending-count").textContent = data.pending;
-        document.getElementById("completed-count").textContent = data.completed;
+        if (resp.ok) {
+          const data = await resp.json();
+          const tasks = data.tasks || [];
+          
+          // Count directly from the tasks we got
+          const total = tasks.length;
+          const completed = tasks.filter(t => t.completed === true).length;
+          const pending = total - completed;
+          
+          // FORCE update the DOM
+          document.getElementById("total-count").innerHTML = total;
+          document.getElementById("pending-count").innerHTML = pending;
+          document.getElementById("completed-count").innerHTML = completed;
+        }
       } catch (err) {
-        console.error("Stats error:", err);
+        // If anything fails, just set to 0
+        document.getElementById("total-count").innerHTML = "0";
+        document.getElementById("pending-count").innerHTML = "0";
+        document.getElementById("completed-count").innerHTML = "0";
       }
     }
 
