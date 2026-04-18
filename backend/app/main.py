@@ -704,6 +704,7 @@ def serve_frontend():
         <span class="stat-label">Completed</span>
       </div>
       <button onclick="updateTaskStats()" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem;">🔄 Refresh</button>
+      <button onclick="testStats()" style="background: rgba(255,0,0,0.3); border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem; margin-left: 5px;">TEST</button>
     </div>
 
     <!-- Create Task -->
@@ -939,81 +940,63 @@ def serve_frontend():
 
 
     async function updateTaskStats() {
-      try {
-        console.log("🔄 Starting stats update...");
-        
-        // Get all tasks
-        let totalResp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
-        console.log("📊 Total response status:", totalResp.status);
-        
-        if (!totalResp.ok) {
-          console.error("❌ Total tasks API failed");
-          return;
+      console.log("🔄 FORCE UPDATING STATS...");
+      
+      // IMMEDIATE TEST - Set test values first
+      document.getElementById("total-count").textContent = "TEST";
+      document.getElementById("pending-count").textContent = "TEST";
+      document.getElementById("completed-count").textContent = "TEST";
+      
+      setTimeout(async () => {
+        try {
+          // Get all tasks with simple fetch
+          const response = await fetch("/tasks?page=1&page_size=1000", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + token
+            }
+          });
+          
+          console.log("📊 Response status:", response.status);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log("📋 All tasks data:", data);
+            
+            const allTasks = data.tasks || [];
+            const totalCount = allTasks.length;
+            const completedCount = allTasks.filter(task => task.completed === true).length;
+            const pendingCount = totalCount - completedCount;
+            
+            console.log("🧮 FINAL COUNTS:", {
+              total: totalCount,
+              completed: completedCount, 
+              pending: pendingCount,
+              tasks: allTasks
+            });
+            
+            // FORCE UPDATE DOM
+            document.getElementById("total-count").innerHTML = totalCount;
+            document.getElementById("pending-count").innerHTML = pendingCount;
+            document.getElementById("completed-count").innerHTML = completedCount;
+            
+            console.log("✅ DOM FORCE UPDATED!");
+          } else {
+            console.error("❌ API call failed:", response.status);
+            // Show error in stats
+            document.getElementById("total-count").textContent = "ERR";
+            document.getElementById("pending-count").textContent = "ERR";
+            document.getElementById("completed-count").textContent = "ERR";
+          }
+        } catch (error) {
+          console.error("💥 CATCH ERROR:", error);
+          // Show error in stats
+          document.getElementById("total-count").textContent = "ERR";
+          document.getElementById("pending-count").textContent = "ERR";
+          document.getElementById("completed-count").textContent = "ERR";
         }
-        
-        let totalData = await totalResp.json();
-        console.log("📋 Total data:", totalData);
-        
-        // Get completed tasks
-        let completedResp = await apiFetch("/tasks?page=1&page_size=1000&completed=true", "GET");
-        console.log("✅ Completed response status:", completedResp.status);
-        
-        if (!completedResp.ok) {
-          console.error("❌ Completed tasks API failed");
-          return;
-        }
-        
-        let completedData = await completedResp.json();
-        console.log("✅ Completed data:", completedData);
-        
-        let totalCount = totalData.tasks ? totalData.tasks.length : 0;
-        let completedCount = completedData.tasks ? completedData.tasks.length : 0;
-        let pendingCount = totalCount - completedCount;
-        
-        console.log("🧮 Calculated counts:", {
-          total: totalCount,
-          completed: completedCount,
-          pending: pendingCount
-        });
-        
-        // Update DOM with error checking
-        const totalEl = document.getElementById("total-count");
-        const pendingEl = document.getElementById("pending-count");
-        const completedEl = document.getElementById("completed-count");
-        
-        console.log("🎯 DOM elements found:", {
-          totalEl: !!totalEl,
-          pendingEl: !!pendingEl,
-          completedEl: !!completedEl
-        });
-        
-        if (totalEl) {
-          totalEl.textContent = totalCount.toString();
-          console.log("✅ Updated total to:", totalCount);
-        }
-        if (pendingEl) {
-          pendingEl.textContent = pendingCount.toString();
-          console.log("✅ Updated pending to:", pendingCount);
-        }
-        if (completedEl) {
-          completedEl.textContent = completedCount.toString();
-          console.log("✅ Updated completed to:", completedCount);
-        }
-        
-        console.log("🎉 Stats update completed successfully!");
-        
-      } catch(err) {
-        console.error("💥 Error in updateTaskStats:", err);
-        
-        // Emergency fallback - set visible numbers
-        const totalEl = document.getElementById("total-count");
-        const pendingEl = document.getElementById("pending-count");
-        const completedEl = document.getElementById("completed-count");
-        
-        if (totalEl) totalEl.textContent = "?";
-        if (pendingEl) pendingEl.textContent = "?";
-        if (completedEl) completedEl.textContent = "?";
-      }
+      }, 100);
     }
 
 
@@ -1252,13 +1235,20 @@ def serve_frontend():
 
 
   function escHtml(str){
-
   return str
   .replace(/&/g,"&amp;")
   .replace(/</g,"&lt;")
   .replace(/>/g,"&gt;")
   .replace(/"/g,"&quot;");
+  }
 
+  // TEST FUNCTION - Force set numbers
+  function testStats() {
+    console.log("🧪 TESTING STATS UPDATE...");
+    document.getElementById("total-count").textContent = "99";
+    document.getElementById("pending-count").textContent = "88";
+    document.getElementById("completed-count").textContent = "77";
+    console.log("✅ Test numbers set!");
   }
 
   </script>
