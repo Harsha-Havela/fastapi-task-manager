@@ -703,7 +703,6 @@ def serve_frontend():
         <span class="stat-number" id="completed-count">0</span>
         <span class="stat-label">Completed</span>
       </div>
-      <button onclick="updateTaskStats()" style="background: #ff4444; border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem; font-weight: bold;">FIX NOW</button>
     </div>
 
     <!-- Create Task -->
