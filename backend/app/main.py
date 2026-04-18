@@ -83,7 +83,7 @@ def serve_frontend():
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       border-radius: 20px;
-      padding: 32px;
+      padding: 24px;
       margin-bottom: 20px;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -133,7 +133,7 @@ def serve_frontend():
     form { 
       display: flex; 
       flex-direction: column; 
-      gap: 20px; 
+      gap: 16px; 
     }
     
     label { 
@@ -465,7 +465,7 @@ def serve_frontend():
       justify-content: space-around;
       align-items: center;
       background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
+      padding: 16px 20px;
       border-radius: 16px;
       margin-bottom: 20px;
       backdrop-filter: blur(10px);
@@ -479,7 +479,7 @@ def serve_frontend():
 
     .stat-number {
       display: block;
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: #ffffff;
       text-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -487,10 +487,10 @@ def serve_frontend():
 
     .stat-label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 500;
       color: rgba(255, 255, 255, 0.8);
-      margin-top: 4px;
+      margin-top: 2px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -625,20 +625,7 @@ def serve_frontend():
       </div>
     </div>
 
-    <!-- Create Task -->
-    <div class="card">
-      <h2>New Task</h2>
-      <form id="create-task-form">
-        <label>Title</label>
-        <input type="text" id="task-title" required placeholder="Task title" />
-        <label>Description (optional)</label>
-        <textarea id="task-desc" placeholder="Task description…" rows="2"></textarea>
-        <button type="submit">Add Task</button>
-      </form>
-      <p id="create-error" class="error hidden"></p>
-    </div>
-
-    <!-- Task Statistics -->
+    <!-- Task Statistics - Top Priority -->
     <div class="stats-bar">
       <div class="stat-item">
         <span class="stat-number" id="total-count">0</span>
@@ -652,6 +639,19 @@ def serve_frontend():
         <span class="stat-number" id="completed-count">0</span>
         <span class="stat-label">Completed</span>
       </div>
+    </div>
+
+    <!-- Create Task -->
+    <div class="card">
+      <h2>New Task</h2>
+      <form id="create-task-form">
+        <label>Title</label>
+        <input type="text" id="task-title" required placeholder="Task title" />
+        <label>Description (optional)</label>
+        <textarea id="task-desc" placeholder="Task description…" rows="2"></textarea>
+        <button type="submit">Add Task</button>
+      </form>
+      <p id="create-error" class="error hidden"></p>
     </div>
 
     <!-- Filter -->
