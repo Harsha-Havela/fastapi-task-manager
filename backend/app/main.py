@@ -810,15 +810,12 @@ def serve_frontend():
       document.getElementById("welcome-msg").textContent = "Hi, " + currentUser;
       currentPage = 1;
       
-      // Test: Set initial values to verify DOM elements work
-      document.getElementById("total-count").textContent = "...";
-      document.getElementById("pending-count").textContent = "...";
-      document.getElementById("completed-count").textContent = "...";
-      
       loadTasks();
       
-      // Update stats after a short delay to ensure tasks are loaded
-      setTimeout(() => updateTaskStats(), 500);
+      // Force stats update after everything loads
+      setTimeout(() => {
+        updateTaskStats();
+      }, 1000);
     }
 
     async function loadTasks() {
@@ -829,9 +826,6 @@ def serve_frontend():
       const data = await resp.json();
       renderTasks(data.tasks);
       renderPagination(data.total_pages);
-      
-      // Update stats immediately after loading tasks
-      setTimeout(() => updateTaskStats(), 100);
     }
 
     function renderTasks(tasks) {
@@ -857,38 +851,26 @@ def serve_frontend():
 
     async function updateTaskStats() {
       try {
-        console.log("Updating task stats...");
         const resp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
-        console.log("Stats response status:", resp.status);
         
         if (resp.ok) {
           const data = await resp.json();
-          console.log("Stats data received:", data);
-          
           const allTasks = data.tasks || [];
-          console.log("All tasks:", allTasks);
           
           const totalCount = allTasks.length;
           const completedCount = allTasks.filter(t => t.completed === true).length;
           const pendingCount = totalCount - completedCount;
 
-          console.log("Calculated counts - Total:", totalCount, "Pending:", pendingCount, "Completed:", completedCount);
-
-          // Update the DOM elements
-          const totalEl = document.getElementById("total-count");
-          const pendingEl = document.getElementById("pending-count");
-          const completedEl = document.getElementById("completed-count");
-          
-          if (totalEl) totalEl.textContent = totalCount;
-          if (pendingEl) pendingEl.textContent = pendingCount;
-          if (completedEl) completedEl.textContent = completedCount;
-          
-          console.log("DOM updated successfully");
-        } else {
-          console.error("Failed to fetch stats, status:", resp.status);
+          // Direct DOM update
+          document.getElementById("total-count").innerText = totalCount.toString();
+          document.getElementById("pending-count").innerText = pendingCount.toString();
+          document.getElementById("completed-count").innerText = completedCount.toString();
         }
       } catch (err) {
-        console.error("Error in updateTaskStats:", err);
+        // Fallback: set to 0 if there's an error
+        document.getElementById("total-count").innerText = "0";
+        document.getElementById("pending-count").innerText = "0";
+        document.getElementById("completed-count").innerText = "0";
       }
     }
 
@@ -921,8 +903,8 @@ def serve_frontend():
       if (resp.ok) {
         document.getElementById("create-task-form").reset();
         currentPage = 1; 
-        loadTasks();
-        updateTaskStats();
+        await loadTasks();
+        await updateTaskStats();
       } else {
         showMsg("create-error", extractError(await resp.json()));
       }
@@ -931,8 +913,8 @@ def serve_frontend():
     async function toggleComplete(id, currentState) {
       const resp = await apiFetch("/tasks/" + id, "PUT", { completed: !currentState });
       if (resp.ok) {
-        loadTasks();
-        updateTaskStats();
+        await loadTasks();
+        await updateTaskStats();
       }
     }
 
@@ -940,8 +922,8 @@ def serve_frontend():
       if (!confirm("Delete this task?")) return;
       const resp = await apiFetch("/tasks/" + id, "DELETE");
       if (resp.ok || resp.status === 204) {
-        loadTasks();
-        updateTaskStats();
+        await loadTasks();
+        await updateTaskStats();
       }
     }
 
