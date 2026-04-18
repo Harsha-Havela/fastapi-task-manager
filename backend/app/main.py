@@ -53,14 +53,17 @@ def serve_frontend():
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #2d3748;
       min-height: 100vh;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
       line-height: 1.6;
     }
 
     .container { 
-      max-width: 480px; 
+      max-width: 900px; 
       margin: 0 auto; 
-      padding-top: 40px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     
     h1 { 
@@ -192,22 +195,21 @@ def serve_frontend():
     }
 
     .app-header {
-      display: flex; 
-      justify-content: space-between;
-      align-items: center; 
-      margin-bottom: 30px; 
-      flex-wrap: wrap; 
-      gap: 15px;
       background: rgba(255, 255, 255, 0.1);
-      padding: 20px 24px;
-      border-radius: 16px;
+      padding: 16px 24px;
       backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
     }
     
     .app-header h1 {
       font-size: 1.8rem;
       margin: 0;
       color: #ffffff;
+      font-weight: 700;
     }
     
     .app-header div { 
@@ -223,11 +225,11 @@ def serve_frontend():
     }
     
     #logout-btn {
-      padding: 10px 20px; 
+      padding: 8px 16px; 
       background: rgba(239, 68, 68, 0.9);
       color: #ffffff; 
       border: none; 
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer; 
       font-weight: 600; 
       font-size: 0.9rem;
@@ -239,29 +241,107 @@ def serve_frontend():
       transform: translateY(-1px);
     }
 
-    .filter-bar { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      margin-bottom: 20px; 
-      flex-wrap: wrap;
+    .stats-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 16px;
       background: rgba(255, 255, 255, 0.1);
-      padding: 16px 20px;
       border-radius: 12px;
       backdrop-filter: blur(10px);
     }
-    
-    .filter-bar span { 
-      font-size: 1rem; 
-      font-weight: 600; 
-      color: rgba(255, 255, 255, 0.9);
+
+    .stat-number {
+      display: block;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 24px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .task-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .task-controls {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .task-list-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .new-task-form {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .new-task-form h3 {
+      color: #ffffff;
+      margin: 0 0 16px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .filter-bar { 
+      display: flex; 
+      gap: 8px; 
+      justify-content: center;
     }
     
     .filter-btn {
-      padding: 8px 16px; 
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      background: transparent; 
-      border-radius: 25px;
+      padding: 8px 20px; 
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1); 
+      border-radius: 20px;
       cursor: pointer; 
       font-size: 0.9rem; 
       transition: all 0.3s ease;
@@ -272,31 +352,31 @@ def serve_frontend():
     .filter-btn.active { 
       background: rgba(255, 255, 255, 0.2); 
       color: #ffffff; 
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: scale(1.02);
     }
 
     .filter-btn:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.15);
       color: #ffffff;
     }
 
     .task-item {
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 16px;
-      padding: 20px 24px; 
-      margin-bottom: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 16px 20px; 
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       display: flex; 
       align-items: flex-start; 
-      gap: 16px;
+      gap: 14px;
       transition: all 0.3s ease;
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .task-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .task-item.completed .task-title { 
@@ -452,12 +532,46 @@ def serve_frontend():
     
     .empty-state { 
       text-align: center; 
-      color: rgba(255, 255, 255, 0.7); 
-      padding: 40px 20px; 
+      color: rgba(255, 255, 255, 0.6); 
+      padding: 60px 20px; 
       font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 16px;
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
+      border-radius: 12px;
       backdrop-filter: blur(10px);
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .auth-switch {
@@ -582,38 +696,66 @@ def serve_frontend():
 
   <!-- App Section -->
   <div id="app-section" class="container hidden">
+    <!-- Fixed Header -->
     <div class="app-header">
-      <h1>My Tasks</h1>
+      <h1>TaskFlow</h1>
       <div>
         <span id="welcome-msg"></span>
         <button id="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
-    <!-- Create Task -->
-    <div class="card">
-      <h2>New Task</h2>
-      <form id="create-task-form">
-        <label>Title</label>
-        <input type="text" id="task-title" required placeholder="Task title" />
-        <label>Description (optional)</label>
-        <textarea id="task-desc" placeholder="Task description…" rows="2"></textarea>
-        <button type="submit">Add Task</button>
-      </form>
-      <p id="create-error" class="error hidden"></p>
+    <!-- Stats Section -->
+    <div class="stats-section">
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-number" id="total-count">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="pending-count">0</span>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="completed-count">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Filter -->
-    <div class="filter-bar">
-      <span>Filter:</span>
-      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-      <button class="filter-btn" onclick="setFilter('false', this)">Pending</button>
-      <button class="filter-btn" onclick="setFilter('true', this)">Completed</button>
-    </div>
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="new-task-form">
+          <h3>Add New Task</h3>
+          <form id="create-task-form">
+            <input type="text" id="task-title" required placeholder="What needs to be done?" />
+            <textarea id="task-desc" placeholder="Description (optional)" rows="2"></textarea>
+            <button type="submit">+ Add Task</button>
+          </form>
+          <p id="create-error" class="error hidden"></p>
+        </div>
+      </div>
 
-    <!-- Task List -->
-    <div id="task-list"></div>
-    <div id="pagination" class="pagination"></div>
+      <!-- Task Area -->
+      <div class="task-area">
+        <!-- Task Controls -->
+        <div class="task-controls">
+          <div class="filter-bar">
+            <button class="filter-btn active" onclick="setFilter('all', this)">All Tasks</button>
+            <button class="filter-btn" onclick="setFilter('false', this)">Pending</button>
+            <button class="filter-btn" onclick="setFilter('true', this)">Completed</button>
+          </div>
+        </div>
+
+        <!-- Scrollable Task List -->
+        <div class="task-list-container">
+          <div id="task-list"></div>
+          <div id="pagination" class="pagination"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -695,6 +837,7 @@ def serve_frontend():
       document.getElementById("welcome-msg").textContent = "Hi, " + currentUser;
       currentPage = 1;
       loadTasks();
+      updateTaskStats();
     }
 
     async function loadTasks() {
@@ -728,6 +871,23 @@ def serve_frontend():
         </div>`).join("");
     }
 
+    function updateTaskStats() {
+      // Fetch all tasks to get accurate counts
+      apiFetch("/tasks?page=1&page_size=1000", "GET").then(async resp => {
+        if (resp.ok) {
+          const data = await resp.json();
+          const allTasks = data.tasks;
+          const totalCount = allTasks.length;
+          const completedCount = allTasks.filter(t => t.completed).length;
+          const pendingCount = totalCount - completedCount;
+
+          document.getElementById("total-count").textContent = totalCount;
+          document.getElementById("pending-count").textContent = pendingCount;
+          document.getElementById("completed-count").textContent = completedCount;
+        }
+      });
+    }
+
     function renderPagination(totalPages) {
       const pg = document.getElementById("pagination");
       if (totalPages <= 1) { pg.innerHTML = ""; return; }
@@ -756,7 +916,9 @@ def serve_frontend():
       const resp = await apiFetch("/tasks", "POST", { title, description });
       if (resp.ok) {
         document.getElementById("create-task-form").reset();
-        currentPage = 1; loadTasks();
+        currentPage = 1; 
+        loadTasks();
+        updateTaskStats();
       } else {
         showMsg("create-error", extractError(await resp.json()));
       }
@@ -764,13 +926,19 @@ def serve_frontend():
 
     async function toggleComplete(id, currentState) {
       const resp = await apiFetch("/tasks/" + id, "PUT", { completed: !currentState });
-      if (resp.ok) loadTasks();
+      if (resp.ok) {
+        loadTasks();
+        updateTaskStats();
+      }
     }
 
     async function deleteTask(id) {
       if (!confirm("Delete this task?")) return;
       const resp = await apiFetch("/tasks/" + id, "DELETE");
-      if (resp.ok || resp.status === 204) loadTasks();
+      if (resp.ok || resp.status === 204) {
+        loadTasks();
+        updateTaskStats();
+      }
     }
 
     async function apiFetch(path, method = "GET", body = null) {
