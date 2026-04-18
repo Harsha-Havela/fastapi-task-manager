@@ -731,221 +731,501 @@ def serve_frontend():
     </div>
   </div>
 
-  <script>
-    const API_BASE = "";
-    let token = localStorage.getItem("tm_token") || null;
-    let currentUser = localStorage.getItem("tm_user") || null;
-    let currentFilter = "all";
-    let currentPage = 1;
-    const PAGE_SIZE = 10;
+    <script>
+  const API_BASE = "";
+  let token = localStorage.getItem("tm_token") || null;
+  let currentUser = localStorage.getItem("tm_user") || null;
+  let currentFilter = "all";
+  let currentPage = 1;
+  const PAGE_SIZE = 10;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      if (token) showApp();
-      document.getElementById("login-form").addEventListener("submit", handleLogin);
-      document.getElementById("register-form").addEventListener("submit", handleRegister);
-      document.getElementById("create-task-form").addEventListener("submit", handleCreateTask);
-    });
-
-    function showTab(tab) {
-      const isLogin = tab === "login";
-      document.getElementById("login-tab").classList.toggle("hidden", !isLogin);
-      document.getElementById("register-tab").classList.toggle("hidden", isLogin);
-      document.getElementById("tab-login-btn").classList.toggle("active", isLogin);
-      document.getElementById("tab-register-btn").classList.toggle("active", !isLogin);
+  document.addEventListener("DOMContentLoaded", () => {
+    if (token){
+      showApp();
     }
 
-    async function handleRegister(e) {
-      e.preventDefault();
-      clearMsg("register-error"); clearMsg("register-success");
-      const username = document.getElementById("reg-username").value.trim();
-      const email    = document.getElementById("reg-email").value.trim();
-      const password = document.getElementById("reg-password").value;
-      const resp = await apiFetch("/register", "POST", { username, email, password });
-      if (resp.ok) {
-        showMsg("register-success", "Account created successfully! Redirecting to login...");
-        document.getElementById("register-form").reset();
-        // Auto-redirect to login after 2 seconds
-        setTimeout(() => {
-          showTab('login');
-          clearMsg("register-success");
-          // Pre-fill username in login form
-          document.getElementById("login-username").value = username;
-          document.getElementById("login-username").focus();
-        }, 2000);
-      } else {
-        showMsg("register-error", extractError(await resp.json()));
-      }
-    }
+    document.getElementById("login-form").addEventListener("submit", handleLogin);
+    document.getElementById("register-form").addEventListener("submit", handleRegister);
+    document.getElementById("create-task-form").addEventListener("submit", handleCreateTask);
+  });
 
-    async function handleLogin(e) {
-      e.preventDefault();
-      clearMsg("login-error");
-      const username = document.getElementById("login-username").value.trim();
-      const password = document.getElementById("login-password").value;
-      const resp = await apiFetch("/login", "POST", { username, password });
-      if (resp.ok) {
-        const data = await resp.json();
-        token = data.access_token;
-        currentUser = username;
-        localStorage.setItem("tm_token", token);
-        localStorage.setItem("tm_user", username);
-        showApp();
-      } else {
-        showMsg("login-error", extractError(await resp.json()));
-      }
-    }
 
-    function logout() {
-      token = null; currentUser = null;
-      localStorage.removeItem("tm_token");
-      localStorage.removeItem("tm_user");
-      document.getElementById("app-section").classList.add("hidden");
-      document.getElementById("auth-section").classList.remove("hidden");
-      document.getElementById("login-form").reset();
-    }
+  function showTab(tab){
+    const isLogin = tab==="login";
 
-    async function showApp() {
-      document.getElementById("auth-section").classList.add("hidden");
-      document.getElementById("app-section").classList.remove("hidden");
-      document.getElementById("welcome-msg").textContent = "Hi, " + currentUser;
-      currentPage = 1;
-      
-      loadTasks();
-      await updateTaskStats();
-    }
+    document.getElementById("login-tab").classList.toggle("hidden", !isLogin);
+    document.getElementById("register-tab").classList.toggle("hidden", isLogin);
 
-    async function loadTasks() {
-      let url = "/tasks?page=" + currentPage + "&page_size=" + PAGE_SIZE;
-      if (currentFilter !== "all") url += "&completed=" + currentFilter;
-      const resp = await apiFetch(url, "GET");
-      if (resp.status === 401) { logout(); return; }
-      const data = await resp.json();
-      renderTasks(data.tasks);
-      renderPagination(data.total_pages);
-    }
+    document.getElementById("tab-login-btn").classList.toggle("active", isLogin);
+    document.getElementById("tab-register-btn").classList.toggle("active", !isLogin);
+  }
 
-    function renderTasks(tasks) {
-      const list = document.getElementById("task-list");
-      if (!tasks.length) {
-        list.innerHTML = '<p class="empty-state">No tasks here yet.</p>';
-        return;
-      }
-      list.innerHTML = tasks.map(t => `
-        <div class="task-item ${t.completed ? "completed" : ""}" id="task-${t.id}">
-          <div class="task-check ${t.completed ? "checked" : ""}"
-               onclick="toggleComplete(${t.id}, ${t.completed})" title="Toggle complete"></div>
-          <div class="task-body">
-            <div class="task-title">${escHtml(t.title)}</div>
-            ${t.description ? `<div class="task-desc">${escHtml(t.description)}</div>` : ""}
-            <div class="task-meta">${new Date(t.created_at).toLocaleString()}</div>
-          </div>
-          <div class="task-actions">
-            <button class="btn-delete" onclick="deleteTask(${t.id})">Delete</button>
-          </div>
-        </div>`).join("");
-    }
 
-    async function updateTaskStats() {
-      try {
-        // Get all tasks
-        let totalResp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
-        let totalData = await totalResp.json();
-        
-        // Get completed tasks
-        let completedResp = await apiFetch("/tasks?page=1&page_size=1000&completed=true", "GET");
-        let completedData = await completedResp.json();
-        
-        let totalCount = totalData.tasks.length;
-        let completedCount = completedData.tasks.length;
-        let pendingCount = totalCount - completedCount;
-        
-        document.getElementById("total-count").textContent = totalCount;
-        document.getElementById("pending-count").textContent = pendingCount;
-        document.getElementById("completed-count").textContent = completedCount;
-      } catch(err) {
-        console.log(err);
-      }
-    }
+  async function handleRegister(e){
+  e.preventDefault();
 
-    function renderPagination(totalPages) {
-      const pg = document.getElementById("pagination");
-      if (totalPages <= 1) { pg.innerHTML = ""; return; }
-      let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>‹ Prev</button>`;
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i === currentPage ? "active" : ""}" onclick="goPage(${i})">${i}</button>`;
-      }
-      html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>Next ›</button>`;
-      pg.innerHTML = html;
-    }
+  clearMsg("register-error");
+  clearMsg("register-success");
 
-    function goPage(page) { currentPage = page; loadTasks(); }
+  const username=document.getElementById("reg-username").value.trim();
+  const email=document.getElementById("reg-email").value.trim();
+  const password=document.getElementById("reg-password").value;
 
-    function setFilter(filter, btn) {
-      currentFilter = filter; currentPage = 1;
-      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      loadTasks();
-    }
+  const resp=await apiFetch("/register","POST",{
+  username,
+  email,
+  password
+  });
 
-    async function handleCreateTask(e) {
-      e.preventDefault();
-      clearMsg("create-error");
-      const title       = document.getElementById("task-title").value.trim();
-      const description = document.getElementById("task-desc").value.trim() || null;
-      const resp = await apiFetch("/tasks", "POST", { title, description });
-      if (resp.ok) {
-        document.getElementById("create-task-form").reset();
-        await loadTasks();
-        await updateTaskStats();
-      } else {
-        showMsg("create-error", extractError(await resp.json()));
-      }
-    }
+  if(resp.ok){
 
-    async function toggleComplete(id, currentState) {
-      const resp = await apiFetch("/tasks/" + id, "PUT", { completed: !currentState });
-      if (resp.ok) {
-        await loadTasks();
-        await updateTaskStats();
-      }
-    }
+  showMsg("register-success","Account created successfully!");
 
-    async function deleteTask(id) {
-      if (!confirm("Delete this task?")) return;
-      const resp = await apiFetch("/tasks/" + id, "DELETE");
-      if (resp.ok || resp.status === 204) {
-        await loadTasks();
-        await updateTaskStats();
-      }
-    }
+  document.getElementById("register-form").reset();
 
-    async function apiFetch(path, method = "GET", body = null) {
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = "Bearer " + token;
-      const opts = { method, headers };
-      if (body && method !== "GET") opts.body = JSON.stringify(body);
-      return fetch(API_BASE + path, opts);
-    }
+  setTimeout(()=>{
+  showTab("login");
+  document.getElementById("login-username").value=username;
+  },2000);
 
-    function extractError(err) {
-      if (typeof err.detail === "string") return err.detail;
-      if (Array.isArray(err.detail)) return err.detail.map(e => e.msg).join(", ");
-      return "An unexpected error occurred.";
-    }
+  }
+  else{
+  showMsg("register-error",extractError(await resp.json()));
+  }
+  }
 
-    function showMsg(id, msg) {
-      const el = document.getElementById(id);
-      el.textContent = msg; el.classList.remove("hidden");
-    }
 
-    function clearMsg(id) {
-      const el = document.getElementById(id);
-      el.textContent = ""; el.classList.add("hidden");
-    }
 
-    function escHtml(str) {
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-    }
+  async function handleLogin(e){
+
+  e.preventDefault();
+
+  clearMsg("login-error");
+
+  const username=document.getElementById("login-username").value.trim();
+  const password=document.getElementById("login-password").value;
+
+  const resp=await apiFetch("/login","POST",{
+  username,
+  password
+  });
+
+  if(resp.ok){
+
+  const data=await resp.json();
+
+  token=data.access_token;
+  currentUser=username;
+
+  localStorage.setItem("tm_token",token);
+  localStorage.setItem("tm_user",username);
+
+  showApp();
+
+  }
+  else{
+  showMsg("login-error",extractError(await resp.json()));
+  }
+
+  }
+
+
+
+  function logout(){
+
+  token=null;
+  currentUser=null;
+
+  localStorage.removeItem("tm_token");
+  localStorage.removeItem("tm_user");
+
+  document.getElementById("app-section").classList.add("hidden");
+  document.getElementById("auth-section").classList.remove("hidden");
+
+  }
+
+
+
+  async function showApp(){
+
+  document.getElementById("auth-section").classList.add("hidden");
+  document.getElementById("app-section").classList.remove("hidden");
+
+  document.getElementById("welcome-msg").textContent="Hi, "+currentUser;
+
+  currentPage=1;
+
+  await loadTasks();
+
+  await updateTaskStats();
+
+  }
+
+
+
+  async function loadTasks(){
+
+  let url="/tasks?page="+currentPage+"&page_size="+PAGE_SIZE;
+
+  if(currentFilter!="all"){
+  url+="&completed="+currentFilter;
+  }
+
+  const resp=await apiFetch(url,"GET");
+
+  if(resp.status===401){
+  logout();
+  return;
+  }
+
+  const data=await resp.json();
+
+  renderTasks(data.tasks);
+
+  renderPagination(data.total_pages);
+
+  }
+
+
+
+
+  function renderTasks(tasks){
+
+  const list=document.getElementById("task-list");
+
+  if(!tasks.length){
+  list.innerHTML='<p class="empty-state">No tasks here yet.</p>';
+  return;
+  }
+
+  list.innerHTML=tasks.map(t=>`
+
+  <div class="task-item ${t.completed ? "completed":""}">
+
+  <div class="task-check ${t.completed ? "checked":""}"
+  onclick="toggleComplete(${t.id},${t.completed})"></div>
+
+  <div class="task-body">
+
+  <div class="task-title">
+  ${escHtml(t.title)}
+  </div>
+
+  ${t.description ?
+  `<div class="task-desc">${escHtml(t.description)}</div>`
+  :""}
+
+  <div class="task-meta">
+  ${new Date(t.created_at).toLocaleString()}
+  </div>
+
+  </div>
+
+  <div class="task-actions">
+  <button class="btn-delete"
+  onclick="deleteTask(${t.id})">
+  Delete
+  </button>
+  </div>
+
+  </div>
+
+  `).join("");
+
+  }
+
+
+
+
+  async function updateTaskStats(){
+
+  try{
+
+  let totalResp=
+  await apiFetch("/tasks?page=1&page_size=1000","GET");
+
+  let totalData=
+  await totalResp.json();
+
+
+  let completedResp=
+  await apiFetch("/tasks?page=1&page_size=1000&completed=true","GET");
+
+  let completedData=
+  await completedResp.json();
+
+
+  let totalCount=
+  totalData.tasks.length;
+
+  let completedCount=
+  completedData.tasks.length;
+
+  let pendingCount=
+  totalCount-completedCount;
+
+
+  document.getElementById("total-count").textContent=
+  totalCount;
+
+  document.getElementById("pending-count").textContent=
+  pendingCount;
+
+  document.getElementById("completed-count").textContent=
+  completedCount;
+
+  }
+  catch(err){
+  console.log(err);
+  }
+
+  }
+
+
+
+
+  function renderPagination(totalPages){
+
+  const pg=
+  document.getElementById("pagination");
+
+  if(totalPages<=1){
+  pg.innerHTML="";
+  return;
+  }
+
+  let html=
+  `<button class="page-btn"
+  onclick="goPage(${currentPage-1})"
+  ${currentPage===1?"disabled":""}>
+  Prev
+  </button>`;
+
+
+  for(let i=1;i<=totalPages;i++){
+
+  html+=
+  `<button class="page-btn ${i===currentPage?"active":""}"
+  onclick="goPage(${i})">
+  ${i}
+  </button>`;
+
+  }
+
+  html+=
+  `<button class="page-btn"
+  onclick="goPage(${currentPage+1})"
+  ${currentPage===totalPages?"disabled":""}>
+  Next
+  </button>`;
+
+  pg.innerHTML=html;
+
+  }
+
+
+
+  function goPage(page){
+
+  currentPage=page;
+
+  loadTasks();
+
+  }
+
+
+
+  function setFilter(filter,btn){
+
+  currentFilter=filter;
+
+  currentPage=1;
+
+  document.querySelectorAll(".filter-btn").forEach(
+  b=>b.classList.remove("active")
+  );
+
+  btn.classList.add("active");
+
+  loadTasks();
+
+  }
+
+
+
+  async function handleCreateTask(e){
+
+  e.preventDefault();
+
+  clearMsg("create-error");
+
+  const title=
+  document.getElementById("task-title").value.trim();
+
+  const description=
+  document.getElementById("task-desc").value.trim()||null;
+
+
+  const resp=
+  await apiFetch("/tasks","POST",{
+  title,
+  description
+  });
+
+
+  if(resp.ok){
+
+  document.getElementById("create-task-form").reset();
+
+  await loadTasks();
+
+  await updateTaskStats();
+
+  }
+  else{
+
+  showMsg("create-error",
+  extractError(await resp.json())
+  );
+
+  }
+
+  }
+
+
+
+  async function toggleComplete(id,currentState){
+
+  const resp=
+  await apiFetch(
+  "/tasks/"+id,
+  "PUT",
+  {
+  completed:!currentState
+  }
+  );
+
+  if(resp.ok){
+
+  await loadTasks();
+
+  await updateTaskStats();
+
+  }
+
+  }
+
+
+
+
+  async function deleteTask(id){
+
+  if(!confirm("Delete this task?")){
+  return;
+  }
+
+  const resp=
+  await apiFetch(
+  "/tasks/"+id,
+  "DELETE"
+  );
+
+  if(resp.ok || resp.status===204){
+
+  await loadTasks();
+
+  await updateTaskStats();
+
+  }
+
+  }
+
+
+
+
+  async function apiFetch(path,method="GET",body=null){
+
+  const headers={
+  "Content-Type":"application/json"
+  };
+
+  if(token){
+  headers["Authorization"]="Bearer "+token;
+  }
+
+  const opts={
+  method,
+  headers
+  };
+
+  if(body && method!=="GET"){
+  opts.body=
+  JSON.stringify(body);
+  }
+
+  return fetch(
+  API_BASE+path,
+  opts
+  );
+
+  }
+
+
+
+  function extractError(err){
+
+  if(typeof err.detail==="string"){
+  return err.detail;
+  }
+
+  if(Array.isArray(err.detail)){
+  return err.detail.map(
+  e=>e.msg
+  ).join(", ");
+  }
+
+  return "Unexpected error";
+
+  }
+
+
+
+  function showMsg(id,msg){
+
+  const el=
+  document.getElementById(id);
+
+  el.textContent=msg;
+
+  el.classList.remove("hidden");
+
+  }
+
+
+
+  function clearMsg(id){
+
+  const el=
+  document.getElementById(id);
+
+  el.textContent="";
+
+  el.classList.add("hidden");
+
+  }
+
+
+
+  function escHtml(str){
+
+  return str
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;");
+
+  }
+
   </script>
 </body>
 </html>"""
