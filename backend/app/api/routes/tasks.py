@@ -108,3 +108,23 @@ def delete_task(
 
     db.delete(task)
     db.commit()
+
+
+@router.get("/stats")
+def get_task_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get task statistics for the authenticated user."""
+    total = db.query(Task).filter(Task.owner_id == current_user.id).count()
+    completed = db.query(Task).filter(
+        Task.owner_id == current_user.id,
+        Task.completed == True
+    ).count()
+    pending = total - completed
+    
+    return {
+        "total": total,
+        "completed": completed,
+        "pending": pending
+    }

@@ -703,8 +703,6 @@ def serve_frontend():
         <span class="stat-number" id="completed-count">0</span>
         <span class="stat-label">Completed</span>
       </div>
-      <button onclick="updateTaskStats()" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem;">🔄 Refresh</button>
-      <button onclick="testStats()" style="background: rgba(255,0,0,0.3); border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-size: 0.8rem; margin-left: 5px;">TEST</button>
     </div>
 
     <!-- Create Task -->
@@ -940,55 +938,18 @@ def serve_frontend():
 
 
     async function updateTaskStats() {
-      console.log("🔄 STARTING REAL STATS UPDATE...");
-      
       try {
-        // Use the same apiFetch function that works for loading tasks
-        const response = await apiFetch("/tasks?page=1&page_size=1000", "GET");
-        console.log("📊 Response received:", response.status);
+        const resp = await apiFetch("/tasks/stats", "GET");
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log("📋 Raw data:", data);
-          
-          const tasks = data.tasks || [];
-          console.log("📝 Tasks array:", tasks);
-          
-          // Count tasks
-          const totalCount = tasks.length;
-          const completedTasks = tasks.filter(task => {
-            console.log("Task:", task.title, "Completed:", task.completed);
-            return task.completed === true;
-          });
-          const completedCount = completedTasks.length;
-          const pendingCount = totalCount - completedCount;
-          
-          console.log("🧮 CALCULATED:", {
-            total: totalCount,
-            completed: completedCount,
-            pending: pendingCount,
-            completedTasks: completedTasks
-          });
-          
-          // Update DOM
-          document.getElementById("total-count").textContent = totalCount.toString();
-          document.getElementById("pending-count").textContent = pendingCount.toString();
-          document.getElementById("completed-count").textContent = completedCount.toString();
-          
-          console.log("✅ STATS UPDATED SUCCESSFULLY!");
-          
-        } else {
-          console.error("❌ API Response not OK:", response.status);
-          document.getElementById("total-count").textContent = "API";
-          document.getElementById("pending-count").textContent = "ERR";
-          document.getElementById("completed-count").textContent = response.status;
-        }
+        if (!resp.ok) return;
         
-      } catch (error) {
-        console.error("💥 ERROR in updateTaskStats:", error);
-        document.getElementById("total-count").textContent = "JS";
-        document.getElementById("pending-count").textContent = "ERR";
-        document.getElementById("completed-count").textContent = "OR";
+        const data = await resp.json();
+        
+        document.getElementById("total-count").textContent = data.total;
+        document.getElementById("pending-count").textContent = data.pending;
+        document.getElementById("completed-count").textContent = data.completed;
+      } catch (err) {
+        console.error("Stats error:", err);
       }
     }
 
@@ -1233,15 +1194,6 @@ def serve_frontend():
   .replace(/</g,"&lt;")
   .replace(/>/g,"&gt;")
   .replace(/"/g,"&quot;");
-  }
-
-  // TEST FUNCTION - Force set numbers
-  function testStats() {
-    console.log("🧪 TESTING STATS UPDATE...");
-    document.getElementById("total-count").textContent = "99";
-    document.getElementById("pending-count").textContent = "88";
-    document.getElementById("completed-count").textContent = "77";
-    console.log("✅ Test numbers set!");
   }
 
   </script>
