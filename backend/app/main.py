@@ -809,8 +809,16 @@ def serve_frontend():
       document.getElementById("app-section").classList.remove("hidden");
       document.getElementById("welcome-msg").textContent = "Hi, " + currentUser;
       currentPage = 1;
+      
+      // Test: Set initial values to verify DOM elements work
+      document.getElementById("total-count").textContent = "...";
+      document.getElementById("pending-count").textContent = "...";
+      document.getElementById("completed-count").textContent = "...";
+      
       loadTasks();
-      updateTaskStats();
+      
+      // Update stats after a short delay to ensure tasks are loaded
+      setTimeout(() => updateTaskStats(), 500);
     }
 
     async function loadTasks() {
@@ -821,7 +829,9 @@ def serve_frontend():
       const data = await resp.json();
       renderTasks(data.tasks);
       renderPagination(data.total_pages);
-      updateTaskStats(); // Update stats after loading tasks
+      
+      // Update stats immediately after loading tasks
+      setTimeout(() => updateTaskStats(), 100);
     }
 
     function renderTasks(tasks) {
@@ -845,30 +855,41 @@ def serve_frontend():
         </div>`).join("");
     }
 
-    function updateTaskStats() {
-      // Fetch all tasks to get accurate counts
-      console.log("Updating task stats...");
-      apiFetch("/tasks?page=1&page_size=1000", "GET").then(async resp => {
+    async function updateTaskStats() {
+      try {
+        console.log("Updating task stats...");
+        const resp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
         console.log("Stats response status:", resp.status);
+        
         if (resp.ok) {
           const data = await resp.json();
-          console.log("Stats data:", data);
+          console.log("Stats data received:", data);
+          
           const allTasks = data.tasks || [];
+          console.log("All tasks:", allTasks);
+          
           const totalCount = allTasks.length;
-          const completedCount = allTasks.filter(t => t.completed).length;
+          const completedCount = allTasks.filter(t => t.completed === true).length;
           const pendingCount = totalCount - completedCount;
 
-          console.log("Counts - Total:", totalCount, "Pending:", pendingCount, "Completed:", completedCount);
+          console.log("Calculated counts - Total:", totalCount, "Pending:", pendingCount, "Completed:", completedCount);
 
-          document.getElementById("total-count").textContent = totalCount;
-          document.getElementById("pending-count").textContent = pendingCount;
-          document.getElementById("completed-count").textContent = completedCount;
+          // Update the DOM elements
+          const totalEl = document.getElementById("total-count");
+          const pendingEl = document.getElementById("pending-count");
+          const completedEl = document.getElementById("completed-count");
+          
+          if (totalEl) totalEl.textContent = totalCount;
+          if (pendingEl) pendingEl.textContent = pendingCount;
+          if (completedEl) completedEl.textContent = completedCount;
+          
+          console.log("DOM updated successfully");
         } else {
-          console.error("Failed to fetch stats:", resp.status);
+          console.error("Failed to fetch stats, status:", resp.status);
         }
-      }).catch(err => {
-        console.error("Error updating stats:", err);
-      });
+      } catch (err) {
+        console.error("Error in updateTaskStats:", err);
+      }
     }
 
     function renderPagination(totalPages) {
