@@ -60,7 +60,10 @@ def serve_frontend():
     .container { 
       max-width: 480px; 
       margin: 0 auto; 
-      padding-top: 40px;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     
     h1 { 
@@ -82,12 +85,19 @@ def serve_frontend():
     .card {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       transition: all 0.3s ease;
+    }
+
+    .card h2 { 
+      font-size: 1.3rem; 
+      margin-bottom: 16px; 
+      color: #2d3748;
+      font-weight: 600;
     }
 
     .card:hover {
@@ -133,7 +143,7 @@ def serve_frontend():
     form { 
       display: flex; 
       flex-direction: column; 
-      gap: 16px; 
+      gap: 12px; 
     }
     
     label { 
@@ -195,17 +205,17 @@ def serve_frontend():
       display: flex; 
       justify-content: space-between;
       align-items: center; 
-      margin-bottom: 30px; 
+      margin-bottom: 16px; 
       flex-wrap: wrap; 
       gap: 15px;
       background: rgba(255, 255, 255, 0.1);
-      padding: 20px 24px;
+      padding: 16px 20px;
       border-radius: 16px;
       backdrop-filter: blur(10px);
     }
     
     .app-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       margin: 0;
       color: #ffffff;
     }
@@ -242,17 +252,17 @@ def serve_frontend():
     .filter-bar { 
       display: flex; 
       align-items: center; 
-      gap: 12px; 
-      margin-bottom: 20px; 
+      gap: 10px; 
+      margin-bottom: 16px; 
       flex-wrap: wrap;
       background: rgba(255, 255, 255, 0.1);
-      padding: 16px 20px;
+      padding: 12px 16px;
       border-radius: 12px;
       backdrop-filter: blur(10px);
     }
     
     .filter-bar span { 
-      font-size: 1rem; 
+      font-size: 0.9rem; 
       font-weight: 600; 
       color: rgba(255, 255, 255, 0.9);
     }
@@ -465,11 +475,11 @@ def serve_frontend():
       justify-content: space-around;
       align-items: center;
       background: rgba(255, 255, 255, 0.1);
-      padding: 16px 20px;
-      border-radius: 16px;
-      margin-bottom: 20px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
       backdrop-filter: blur(10px);
-      gap: 20px;
+      gap: 16px;
     }
 
     .stat-item {
@@ -479,7 +489,7 @@ def serve_frontend():
 
     .stat-number {
       display: block;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: #ffffff;
       text-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -487,7 +497,7 @@ def serve_frontend():
 
     .stat-label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: 500;
       color: rgba(255, 255, 255, 0.8);
       margin-top: 2px;
@@ -514,6 +524,60 @@ def serve_frontend():
     .auth-link:hover {
       color: #5a67d8;
       text-decoration: underline;
+    }
+
+    .compact-card {
+      padding: 16px !important;
+    }
+
+    .compact-card h2 {
+      margin-bottom: 12px !important;
+      font-size: 1.2rem !important;
+    }
+
+    .compact-card form {
+      gap: 10px !important;
+    }
+
+    .compact-card input, .compact-card textarea {
+      padding: 10px 14px !important;
+      font-size: 0.9rem !important;
+      border-radius: 8px !important;
+    }
+
+    .compact-card textarea {
+      min-height: 50px !important;
+    }
+
+    .compact-card button {
+      padding: 10px 16px !important;
+      font-size: 0.9rem !important;
+      border-radius: 8px !important;
+    }
+
+    .task-container {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 300px;
+      padding-right: 4px;
+    }
+
+    .task-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .task-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .task-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .task-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
     }
 
     @media (max-width: 480px) {
@@ -642,13 +706,11 @@ def serve_frontend():
     </div>
 
     <!-- Create Task -->
-    <div class="card">
+    <div class="card compact-card">
       <h2>New Task</h2>
       <form id="create-task-form">
-        <label>Title</label>
         <input type="text" id="task-title" required placeholder="Task title" />
-        <label>Description (optional)</label>
-        <textarea id="task-desc" placeholder="Task description…" rows="2"></textarea>
+        <textarea id="task-desc" placeholder="Task description (optional)…" rows="2"></textarea>
         <button type="submit">Add Task</button>
       </form>
       <p id="create-error" class="error hidden"></p>
@@ -662,9 +724,11 @@ def serve_frontend():
       <button class="filter-btn" onclick="setFilter('true', this)">Completed</button>
     </div>
 
-    <!-- Task List -->
-    <div id="task-list"></div>
-    <div id="pagination" class="pagination"></div>
+    <!-- Task List Container -->
+    <div class="task-container">
+      <div id="task-list"></div>
+      <div id="pagination" class="pagination"></div>
+    </div>
   </div>
 
   <script>
