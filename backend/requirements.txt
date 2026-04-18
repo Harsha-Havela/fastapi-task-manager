@@ -6,3 +6,5 @@ pydantic-settings
 python-jose[cryptography]
 bcrypt
 python-multipart
+email-validator
+passlib[bcrypt]
