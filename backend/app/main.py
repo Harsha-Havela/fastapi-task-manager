@@ -37,8 +37,8 @@ app.include_router(auth.router)
 app.include_router(tasks.router)
 
 # Serve the frontend static files if the folder exists
-# __file__ is app/main.py → go up to app/ → backend/ → task-manager/ → frontend/
-FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))
+# Railway runs from backend/ directory, so frontend is at ../frontend/
+FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "frontend"))
 if os.path.isdir(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
