@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
+from pathlib import Path
 
 from app.core.config import settings
 from app.db.session import engine, Base
@@ -15,8 +16,9 @@ import app.models.task  # noqa: F401
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
 
-# Initialize Jinja2 templates
-templates = Jinja2Templates(directory="app/templates")
+# Initialize Jinja2 templates with absolute path
+BASE_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 app = FastAPI(
     title=settings.APP_NAME,
