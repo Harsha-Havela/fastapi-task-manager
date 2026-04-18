@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 import os
 
 from app.core.config import settings
@@ -36,15 +35,47 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(tasks.router)
 
-# Serve the frontend static files if the folder exists
-# Railway runs from backend/ directory, so frontend is at ../frontend/
-FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "frontend"))
-if os.path.isdir(FRONTEND_DIR):
-    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
-
-    @app.get("/", include_in_schema=False)
-    def serve_frontend():
-        return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+# Simple root endpoint to serve frontend content
+@app.get("/", include_in_schema=False)
+def serve_frontend():
+    # For now, let's serve a simple HTML response
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Task Manager</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+            .container { text-align: center; }
+            .btn { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px; }
+            .btn:hover { background: #0056b3; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎉 FastAPI Task Manager</h1>
+            <p>Your Task Manager is successfully deployed!</p>
+            <div>
+                <a href="/docs" class="btn">📚 API Documentation</a>
+                <a href="/redoc" class="btn">📖 ReDoc</a>
+            </div>
+            <h2>API Endpoints:</h2>
+            <ul style="text-align: left;">
+                <li><strong>POST /register</strong> - Register a new user</li>
+                <li><strong>POST /login</strong> - Login and get JWT token</li>
+                <li><strong>GET /tasks</strong> - Get all tasks (requires auth)</li>
+                <li><strong>POST /tasks</strong> - Create a task (requires auth)</li>
+                <li><strong>PUT /tasks/{id}</strong> - Update a task (requires auth)</li>
+                <li><strong>DELETE /tasks/{id}</strong> - Delete a task (requires auth)</li>
+            </ul>
+            <p><strong>Your API is ready for testing!</strong></p>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 
 @app.get("/health", tags=["Health"])
