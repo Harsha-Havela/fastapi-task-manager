@@ -821,6 +821,7 @@ def serve_frontend():
       const data = await resp.json();
       renderTasks(data.tasks);
       renderPagination(data.total_pages);
+      updateTaskStats(); // Update stats after loading tasks
     }
 
     function renderTasks(tasks) {
@@ -846,18 +847,27 @@ def serve_frontend():
 
     function updateTaskStats() {
       // Fetch all tasks to get accurate counts
+      console.log("Updating task stats...");
       apiFetch("/tasks?page=1&page_size=1000", "GET").then(async resp => {
+        console.log("Stats response status:", resp.status);
         if (resp.ok) {
           const data = await resp.json();
-          const allTasks = data.tasks;
+          console.log("Stats data:", data);
+          const allTasks = data.tasks || [];
           const totalCount = allTasks.length;
           const completedCount = allTasks.filter(t => t.completed).length;
           const pendingCount = totalCount - completedCount;
 
+          console.log("Counts - Total:", totalCount, "Pending:", pendingCount, "Completed:", completedCount);
+
           document.getElementById("total-count").textContent = totalCount;
           document.getElementById("pending-count").textContent = pendingCount;
           document.getElementById("completed-count").textContent = completedCount;
+        } else {
+          console.error("Failed to fetch stats:", resp.status);
         }
+      }).catch(err => {
+        console.error("Error updating stats:", err);
       });
     }
 
