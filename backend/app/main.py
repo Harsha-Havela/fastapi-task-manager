@@ -804,18 +804,14 @@ def serve_frontend():
       document.getElementById("login-form").reset();
     }
 
-    function showApp() {
+    async function showApp() {
       document.getElementById("auth-section").classList.add("hidden");
       document.getElementById("app-section").classList.remove("hidden");
       document.getElementById("welcome-msg").textContent = "Hi, " + currentUser;
       currentPage = 1;
       
       loadTasks();
-      
-      // Force stats update after everything loads
-      setTimeout(() => {
-        updateTaskStats();
-      }, 1000);
+      await updateTaskStats();
     }
 
     async function loadTasks() {
@@ -851,26 +847,23 @@ def serve_frontend():
 
     async function updateTaskStats() {
       try {
-        const resp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
+        // Get all tasks
+        let totalResp = await apiFetch("/tasks?page=1&page_size=1000", "GET");
+        let totalData = await totalResp.json();
         
-        if (resp.ok) {
-          const data = await resp.json();
-          const allTasks = data.tasks || [];
-          
-          const totalCount = allTasks.length;
-          const completedCount = allTasks.filter(t => t.completed === true).length;
-          const pendingCount = totalCount - completedCount;
-
-          // Direct DOM update
-          document.getElementById("total-count").innerText = totalCount.toString();
-          document.getElementById("pending-count").innerText = pendingCount.toString();
-          document.getElementById("completed-count").innerText = completedCount.toString();
-        }
-      } catch (err) {
-        // Fallback: set to 0 if there's an error
-        document.getElementById("total-count").innerText = "0";
-        document.getElementById("pending-count").innerText = "0";
-        document.getElementById("completed-count").innerText = "0";
+        // Get completed tasks
+        let completedResp = await apiFetch("/tasks?page=1&page_size=1000&completed=true", "GET");
+        let completedData = await completedResp.json();
+        
+        let totalCount = totalData.tasks.length;
+        let completedCount = completedData.tasks.length;
+        let pendingCount = totalCount - completedCount;
+        
+        document.getElementById("total-count").textContent = totalCount;
+        document.getElementById("pending-count").textContent = pendingCount;
+        document.getElementById("completed-count").textContent = completedCount;
+      } catch(err) {
+        console.log(err);
       }
     }
 
@@ -902,7 +895,6 @@ def serve_frontend():
       const resp = await apiFetch("/tasks", "POST", { title, description });
       if (resp.ok) {
         document.getElementById("create-task-form").reset();
-        currentPage = 1; 
         await loadTasks();
         await updateTaskStats();
       } else {
